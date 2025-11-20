@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Engineering: Guía de Pinto</title>
+    
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- VARIABLES Y RESET --- */
+        :root {
+            --color-brand: #0ea5e9;       /* Sky 500 */
+            --color-brand-hover: #0284c7; /* Sky 600 */
+            --color-bg: #0f172a;          /* Slate 900 */
+            --color-card: #1e293b;        /* Slate 800 */
+            --color-border: #334155;      /* Slate 700 */
+            --color-text-main: #ffffff;
+            --color-text-muted: #94a3b8;  /* Slate 400 */
+            --color-code-bg: #0b1120;
+            
+            --font-sans: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --container-width: 1024px;
+            --header-height: 64px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: #e2e8f0;
+            font-family: var(--font-sans);
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        a { text-decoration: none; color: inherit; transition: color 0.2s; }
+        ul { list-style: none; }
+        button { border: none; background: none; cursor: pointer; font-family: inherit; }
+
+        /* --- UTILIDADES --- */
+        .container {
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .hidden { display: none; }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            height: var(--header-height);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            background-color: var(--color-brand);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: white;
+            letter-spacing: -0.025em;
+        }
+        .logo-highlight { color: var(--color-brand); }
+
+        .nav-links a {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #d1d5db;
+        }
+        .nav-links a:hover { color: white; }
+
+        /* Responsive Nav */
+        @media (min-width: 768px) {
+            .nav-links { display: flex; gap: 1.5rem; }
+        }
+        @media (max-width: 767px) {
+            .nav-links { display: none; }
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            position: relative;
+            padding: 5rem 0;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background-image: url('https://images.unsplash.com/photo-1558267813-0441f863c751?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, var(--color-bg), transparent, var(--color-bg));
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 48rem;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.025em;
+            line-height: 1.1;
+        }
+        
+        @media (min-width: 768px) {
+            .hero-title { font-size: 3.75rem; }
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, var(--color-brand), #a855f7);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .hero-desc {
+            font-size: 1.125rem;
+            color: var(--color-text-muted);
+            max-width: 42rem;
+            margin: 0 auto 2rem auto;
+        }
+
+        /* --- TIMELINE SECTION --- */
+        .main-content {
+            flex-grow: 1;
+            max-width: 56rem; /* max-w-4xl */
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+            padding-bottom: 3rem;
+            border-left: 2px solid var(--color-border);
+            transition: border-color 0.3s ease;
+        }
+        
+        @media (min-width: 640px) {
+            .timeline-item { padding-left: 3rem; }
+        }
+
+        .timeline-item:hover {
+            border-left-color: var(--color-brand);
+        }
+
+        /* Dot on the timeline */
+        .timeline-marker {
+            position: absolute;
+            left: -9px; /* Center on the 2px border */
+            top: 0;
+            background-color: var(--color-bg);
+            padding: 0.25rem;
+        }
+        .timeline-dot {
+            height: 1rem;
+            width: 1rem;
+            border-radius: 50%;
+            background-color: var(--color-brand);
+            box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
+        }
+
+        .card-header {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+        }
+        
+        @media (min-width: 640px) {
+            .card-header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .step-label {
+            color: var(--color-brand);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+
+        .tags {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        @media (min-width: 640px) {
+            .tags { margin-top: 0; }
+        }
+
+        .tag {
+            padding: 0.25rem 0.5rem;
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        .description {
+            color: var(--color-text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- CODE BLOCK --- */
+        .code-card {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: var(--color-code-bg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .code-label {
+            font-size: 0.75rem;
+            color: #64748b; /* Slate 500 */
+            font-family: var(--font-mono);
+        }
+
+        .btn-copy {
+            color: var(--color-text-muted);
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: color 0.2s;
+        }
+        .btn-copy:hover { color: var(--color-brand); }
+        .btn-copy.copied { color: #22c55e; /* Green 500 */ }
+
+        .code-content {
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .code-pre {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            color: #d1d5db;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+        }
+
+        /* Syntax Highlighting simulated */
+        .highlight-keyword { color: var(--color-brand); font-weight: 700; }
+        .highlight-brackets { color: #c084fc; font-weight: 600; } /* Purple */
+        .highlight-bold { color: #eab308; font-weight: 600; } /* Yellow */
+
+        /* --- AI SNIPPET --- */
+        .ai-snippet {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .ai-snippet:hover { opacity: 1; }
+
+        .ai-icon {
+            min-width: 24px;
+            height: 24px;
+            background-color: rgba(168, 85, 247, 0.2); /* Purple tint */
+            border-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c084fc;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .ai-text {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            font-style: italic;
+        }
+
+        /* --- ANIMATION --- */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in forwards;
+            opacity: 0; /* Start hidden */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- FOOTER --- */
+        .footer {
+            border-top: 1px solid var(--color-border);
+            background-color: var(--color-card);
+            padding: 2.5rem 0;
+            margin-top: 5rem;
+            text-align: center;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--color-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container nav-content">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-robot" style="font-size: 1.25rem;"></i>
+                </div>
+                <span class="logo-text">Prompt<span class="logo-highlight">Guide</span>: Pinto</span>
+            </div>
+            <div class="nav-links">
+                <a href="#">Sobre el Proyecto</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        
+        <div class="hero-content">
+            <h1 class="hero-title">
+                Creando la Guía Definitiva de <span class="gradient-text">Pinto</span>
+            </h1>
+            <p class="hero-desc">
+                Una colección curada de los prompts utilizados para generar una guía turística completa, histórica y gastronómica de Pinto usando IA Generativa.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="prompts-container" class="main-content">
+        <!-- JS injects content here -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <!-- Contenido eliminado según peticiones anteriores -->
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- BASE DE DATOS DE PROMPTS (Exactamente la misma data) ---
+        const promptData = [
+            {
+                id: 1,
+                step: "Fase 1: Estructura y Concepto Web",
+                title: "Arquitectura de la Guía Digital",
+                description: "Definimos el rol técnico (Web Dev) para obtener no solo texto, sino una estructura de sitio web organizada por secciones y experiencia de usuario (UX).",
+                tags: ["Rol: Dev Senior", "Sitemap", "UX/UI"],
+                prompt: "Actúa como un Desarrollador Web Senior y experto en UX con amplia experiencia en el sector turismo.\n\nQuiero crear una plataforma web moderna titulada 'Guía de Viaje: Pinto'. Tu objetivo es estructurar la arquitectura de la información y el contenido clave.\n\nGenera un esquema detallado (Sitemap) que cubra:\n1. **Sitios Turísticos**: Descripción técnica y atractiva de monumentos (Torre de Éboli, Iglesia).\n2. **Gastronomía**: Selección de restaurantes top y platos típicos (Ombligos de Pinto).\n3. **Deportes y Naturaleza**: Rutas ciclistas, actividades en el Parque Juan Carlos I y polideportivos.\n4. **Información Práctica**: Transporte y consejos.\n\nEl formato de salida debe ser estructurado (Headers, Bullet points) listo para ser implementado en una web.",
+                aiSnippet: "¡Entendido! Aquí tienes la propuesta de arquitectura web (Sitemap) para 'Descubre Pinto', optimizada para navegación móvil y SEO..."
+            },
+            {
+                id: 2,
+                step: "Fase 2: Diseño Avanzado y Personalización",
+                title: "Evolución UI y Panel de Ajustes",
+                description: "Solicitamos transformar la estructura básica en una Single Page Application (SPA) visualmente atractiva con capacidades de configuración para el usuario.",
+                tags: ["UI High-Fidelity", "Ajustes", "Navegación"],
+                prompt: "Ahora actúa como un Diseñador de Interfaces (UI) y Desarrollador Frontend. Vamos a iterar sobre la estructura anterior para hacerla visualmente impactante y funcional.\n\nRequisitos de Mejora:\n1. **Estética Visual**: Implementa un diseño moderno ('Glassmorphism' o Minimalista) con uso de tarjetas, sombras suaves y una paleta de colores atractiva.\n2. **Navegación Multi-Pantalla**: En lugar de un scroll infinito, divide el contenido en 'Vistas' o 'Pantallas' navegables (Inicio, Mapa, Gastronomía, Historia).\n3. **Rueda de Ajustes (Settings)**: Crea un componente de configuración robusto accesible mediante un icono de engranaje. Debe permitir al usuario:\n   - Cambiar Tema (Claro/Oscuro).\n   - Ajustar tamaño de texto.\n   - Filtrar recomendaciones (ej: 'Solo accesible', 'Con niños').\n\nDame el código y la lógica necesaria para implementar estas mejoras.",
+                aiSnippet: "¡Claro! Vamos a elevar el nivel. Aquí tienes la estructura para una SPA con navegación por pestañas y un panel de ajustes modal totalmente funcional..."
+            },
+            {
+                id: 3,
+                step: "Fase 3: Contenido & Geolocalización",
+                title: "Poblado de Datos y Google Maps",
+                description: "Llenamos la web con contenido real categorizado. La clave aquí es la petición técnica de generar enlaces dinámicos a mapas para cada punto de interés.",
+                tags: ["Data Population", "API Links", "Contenido Local"],
+                prompt: "Actúa como un Gestor de Contenidos Local y Experto en Datos. Necesito poblar las secciones de la web con información rica y accionable sobre Pinto.\n\nGenera 4 listados detallados con los mejores sitios para:\n1. **Qué Ver**: Monumentos imprescindibles (Torre de Éboli, Arqueopinto...).\n2. **Dónde Comer**: Restaurantes destacados y zonas de tapeo.\n3. **Deporte**: Instalaciones deportivas y rutas running/bici.\n4. **Fiestas**: Calendario de eventos clave (Fiestas de Agosto, Chocolate).\n\n**REQUISITO TÉCNICO CRÍTICO**: Para CADA lugar mencionado, debes generar un campo 'location_url' con un enlace de búsqueda directa a Google Maps (formato: `https://www.google.com/maps/search/?api=1&query=Nombre+Sitio+Pinto`). El objetivo es que el usuario pueda hacer clic en 'Cómo llegar' y se abra su app de mapas automáticamente.",
+                aiSnippet: "Entendido. Generando base de datos estructurada (JSON) con nombres, descripciones y enlaces profundos (deep links) a Google Maps para cada POI..."
+            },
+            {
+                id: 4,
+                step: "Fase 4: Debugging & Refactorización",
+                title: "Corrección de Funcionalidades (Settings)",
+                description: "El código generado en la fase 2 tenía un problema común: la interfaz existía pero no funcionaba. Pedimos un arreglo técnico específico.",
+                tags: ["Bug Fix", "JavaScript Logic", "LocalStorage"],
+                prompt: "Actúa como un Desarrollador Web Senior especializado en Troubleshooting. He revisado la aplicación generada y he encontrado varios fallos críticos: la mayoría de las configuraciones del panel de ajustes NO funcionan.\n\nPor favor, audita el código JavaScript actual y refactorízalo para solucionar lo siguiente:\n1. **Funcionalidad Real**: Los botones de 'Tema Oscuro' y 'Tamaño de Fuente' deben modificar el DOM inmediatamente.\n2. **Persistencia**: Implementa `localStorage` para que si el usuario elige el modo oscuro, este se mantenga al recargar la página.\n3. **Limpieza**: Elimina cualquier función 'dummy' (falsa) y reemplázala con lógica real.\n\nDame el bloque de `<script>` corregido y explícame brevemente dónde estaba el error.",
+                aiSnippet: "Analizando código... Detectado error en los Event Listeners del panel de ajustes. Refactorizando lógica para incluir persistencia de estado y manipulación real del DOM..."
+            },
+            {
+                id: 5,
+                step: "Fase 5: UI Polish & Accesibilidad",
+                title: "Corrección de Layout (Alto Contraste)",
+                description: "Detectamos un 'Layout Shift' (descentrado) al usar el modo accesible. Pedimos una solución CSS precisa que no rompa la maquetación.",
+                tags: ["CSS Expert", "Bug Visual", "Layout Shift"],
+                prompt: "Actúa como un Desarrollador Frontend experto en CSS y Accesibilidad.\n\nHe encontrado un bug visual (Layout Shift) en el panel de configuración:\n**Problema:** Cuando activo la opción de 'Alto Contraste', el contenedor completo de ajustes se descentra y se desplaza lateralmente.\n\n**Diagnóstico:** Sospecho que la clase de alto contraste está añadiendo bordes o márgenes que alteran el `box-model` del contenedor, empujándolo fuera de su eje central.\n\n**Solicitud:** Dame el código CSS corregido (quizás usando `box-sizing: border-box` o `outline` en lugar de `border`) para asegurar que activar esta opción solo cambie los colores pero mantenga la posición de los elementos **pixel-perfect**.",
+                aiSnippet: "¡Oído! Tienes razón, el borde extra estaba sumando ancho al elemento. Aquí tienes la corrección usando 'outline' para no afectar al layout..."
+            },
+            {
+                id: 6,
+                step: "Fase 6: Micro-Interacciones",
+                title: "Corrección de Animación en Toggles",
+                description: "El usuario reportó que el switch de 'Alto Contraste' funcionaba lógicamente pero no visualmente (la bolita no se movía).",
+                tags: ["UI Animation", "Interactive State", "CSS Classes"],
+                prompt: "Actúa como un Desarrollador Frontend especialista en Animaciones y Micro-interacciones.\n\nTenemos un bug de UX en el interruptor de 'Alto Contraste':\n**Problema:** Al hacer clic, el modo se activa correctamente, pero el interruptor (el círculo blanco dentro del botón) no se mueve. Se queda fijo a la izquierda, confundiendo al usuario sobre si está encendido o apagado.\n\n**Solución Requerida:** Revisa la función del evento `click`. Asegúrate de que estamos alternando correctamente la clase CSS de traslación (ej: `translate-x-full`) en el elemento hijo (el círculo) y no solo cambiando el color de fondo del contenedor padre. El movimiento debe ser suave (`transition-transform`).",
+                aiSnippet: "Revisado. El error era que el selector JS apuntaba al contenedor y no al círculo interno. Aquí tienes la función corregida para animar el 'knob' del switch..."
+            },
+            {
+                id: 7,
+                step: "Fase 7: Integración de Mapas",
+                title: "Mapa Interactivo Embebido",
+                description: "La geolocalización estática no es suficiente. Solicitamos la inserción de un mapa navegable para mejorar la orientación del turista.",
+                tags: ["Google Maps Embed", "Iframe Responsive", "UX"],
+                prompt: "Actúa como un Desarrollador Frontend.\n\nLa lista de enlaces a Google Maps está bien, pero quiero que el usuario pueda explorar la ciudad sin salir de la web. \n\nAñade una nueva sección llamada 'Explora el Mapa' que integre un **Mapa Interactivo** de Google Maps.\n\n**Requisitos Técnicos:**\n1. **Embed**: Usa un `iframe` centrado en las coordenadas de Pinto.\n2. **Responsividad**: El mapa debe ocupar el 100% del ancho disponible y tener una altura adecuada tanto en móvil (300px) como en escritorio (500px).\n3. **Estética**: Encapsula el mapa en un contenedor con el mismo estilo 'glass' (bordes redondeados, sombra) que el resto de tarjetas para que no parezca un pegote ajeno al diseño.\n\nDame el código HTML y CSS necesario.",
+                aiSnippet: "Entendido. Aquí tienes el código para el contenedor responsive del iframe, ajustado para centrarse en el Ayuntamiento de Pinto y con los estilos de borde integrados..."
+            },
+            {
+                id: 8,
+                step: "Fase 8: Utilidad en Tiempo Real",
+                title: "Widget Meteorológico Básico",
+                description: "Para planificar el viaje, el usuario necesita saber si va a llover. Pedimos la integración de un componente visual del tiempo.",
+                tags: ["Weather Widget", "UI Components", "Mock Data"],
+                prompt: "Actúa como un Desarrollador Frontend con ojo para el diseño.\n\nNecesito añadir una sección de 'El Tiempo en Pinto' para completar la experiencia del viajero.\n\n**Requisitos del Widget:**\n1. **Estilo Visual**: Diseña una tarjeta compacta y elegante con estilo 'Glassmorphism' que encaje con el resto de la web.\n2. **Información**: Debe mostrar la temperatura actual (grande), el estado (ej: 'Soleado') y la humedad.\n3. **Implementación**: Dado que no tenemos una API Key de OpenWeatherMap configurada, crea el componente usando **datos simulados (Mock Data)** por ahora, pero estructura el código JavaScript para que sea fácil sustituir esos valores fijos por una llamada `fetch()` en el futuro.\n\nIncluye iconos climáticos (usando FontAwesome) que cambien dinámicamente según el 'estado' simulado.",
+                aiSnippet: "¡Buena idea! Aquí tienes el código para el widget del tiempo. He creado una función `renderWeather()` que simula la respuesta de una API para pintar la interfaz..."
+            },
+            {
+                id: 9,
+                step: "Fase 9: Previsión Extendida",
+                title: "Ampliación a 7 Días",
+                description: "El usuario quiere planificar la semana entera. Expandimos el widget para incluir un pronóstico semanal detallado.",
+                tags: ["Weekly Forecast", "Grid Layout", "Data Array"],
+                prompt: "Actúa como un Desarrollador Frontend.\n\nVamos a mejorar el widget del tiempo (Fase 8). La vista actual es insuficiente para un viaje largo.\n\n**Requerimiento:**\nAmplía el componente para mostrar una **Previsión de 7 Días** justo debajo del estado actual.\n\n**Detalles Técnicos:**\n1. **Layout**: Usa un `grid` horizontal responsivo o una lista flex (`flex-row`) para alinear los días.\n2. **Datos**: Genera un array de objetos simulados (Mock Data) para los próximos 7 días (Día, Icono, Temp Max/Min).\n3. **UI**: Mantén la consistencia visual. Los días futuros deben verse más pequeños y limpios para no robar protagonismo al tiempo actual.\n\nDame el HTML y CSS actualizado del widget completo.",
+                aiSnippet: "Entendido. Actualizando el componente meteorológico. He añadido un array `weeklyForecast` y un bucle `.map` para generar las 7 tarjetas de previsión..."
+            },
+            {
+                id: 10,
+                step: "Fase 10: IA Conversacional (RAG)",
+                title: "Chatbot 'Guía Inteligente'",
+                description: "Implementamos un asistente virtual que responde dudas basándose exclusivamente en los datos locales de la guía.",
+                tags: ["Chatbot UI", "RAG Simulation", "Context Aware"],
+                prompt: "Actúa como un Ingeniero de IA y Desarrollador Full Stack.\n\nVamos a añadir la 'Joya de la Corona' a la guía de Pinto: un **Asistente Virtual Inteligente**.\n\n**Funcionalidad Requerida:**\n1. **Nueva Pestaña/Modal**: Añade un acceso a 'Guía IA' estilo chat (tipo ChatGPT/WhatsApp).\n2. **Lógica de Respuesta (Simulada)**: El bot debe ser capaz de responder preguntas como '¿Dónde comer barato?' o '¿Planes con niños?'.\n3. **Constraint (IMPORTANTE)**: La IA NO debe inventar. Debe buscar palabras clave en nuestro JSON de datos (restaurantes, parques) y construir una respuesta basada EXCLUSIVAMENTE en nuestros sitios de Pinto.\n\nDame el código para la interfaz de chat y la lógica JS para filtrar respuestas según el input del usuario.",
+                aiSnippet: "Iniciando protocolo de asistente... Creando interfaz de chat flotante y conectando el motor de búsqueda semántica simple para filtrar recomendaciones locales..."
+            },
+            {
+                id: 11,
+                step: "Fase 11: Accesibilidad & Audio UX",
+                title: "Audioguía Integrada (TTS)",
+                description: "Llevamos la accesibilidad al siguiente nivel permitiendo que la web lea las descripciones de los monumentos con voz natural.",
+                tags: ["Web Speech API", "Text-to-Speech", "Accesibilidad"],
+                prompt: "Actúa como un Desarrollador Frontend experto en Accesibilidad Web.\n\nQuiero llevar la experiencia de usuario al siguiente nivel convirtiendo la web en una **Audioguía Real**.\n\n**Requerimiento:**\nImplementa una funcionalidad de **Texto a Voz (Text-to-Speech)** en las tarjetas de detalle de cada monumento.\n\n**Detalles Técnicos:**\n1. **UI**: Añade un botón flotante o discreto con un icono de altavoz (🔊).\n2. **Lógica**: Usa la Web Speech API nativa (`window.speechSynthesis`).\n3. **UX**: El botón debe cambiar de estado (Play/Pause). Si el usuario cambia de tarjeta o pulsa otro audio, el anterior debe detenerse inmediatamente.\n\nDame el código JavaScript para gestionar estas instancias de audio sin usar librerías externas.",
+                aiSnippet: "¡Implementado! He integrado el sintetizador de voz del navegador. Ahora cada ficha tiene un botón 'Escuchar' que lee el contenido dinámicamente..."
+            }
+        ];
+
+        // --- FUNCIONES DE RENDERIZADO ---
+        const container = document.getElementById('prompts-container');
+
+        function renderPrompts() {
+            container.innerHTML = '';
+            
+            promptData.forEach((item, index) => {
+                // Crear el contenedor de la tarjeta
+                const section = document.createElement('div');
+                section.className = 'timeline-item fade-in';
+                // Retraso escalonado para la animación
+                section.style.animationDelay = `${index * 0.1}s`;
+
+                // Marcador (punto en la línea)
+                const markerWrapper = document.createElement('div');
+                markerWrapper.className = 'timeline-marker';
+                markerWrapper.innerHTML = '<div class="timeline-dot"></div>';
+                section.appendChild(markerWrapper);
+
+                // Generar las etiquetas HTML
+                const tagsHTML = item.tags.map(tag => `<span class="tag">${tag}</span>`).join('');
+                
+                // Generar el snippet de IA si existe
+                const aiSnippetHTML = item.aiSnippet ? `
+                    <div class="ai-snippet">
+                        <div class="ai-icon">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <p class="ai-text">"${item.aiSnippet}"</p>
+                    </div>
+                ` : '';
+
+                // Inyectar el HTML interno con las nuevas clases CSS nativas
+                section.innerHTML += `
+                    <div class="card-header">
+                        <div>
+                            <span class="step-label">${item.step}</span>
+                            <h2 class="card-title">${item.title}</h2>
+                        </div>
+                        <div class="tags">
+                            ${tagsHTML}
+                        </div>
+                    </div>
+                    
+                    <p class="description">${item.description}</p>
+
+                    <!-- Bloque de Código / Prompt -->
+                    <div class="code-card">
+                        <div class="code-header">
+                            <span class="code-label">Enriched Prompt</span>
+                            <button onclick="copyToClipboard(this)" data-content="${item.prompt.replace(/"/g, '&quot;')}" class="btn-copy">
+                                <i class="fa-regular fa-copy"></i> Copiar
+                            </button>
+                        </div>
+                        <div class="code-content">
+                            <pre class="code-pre">${highlightKeywords(item.prompt)}</pre>
+                        </div>
+                    </div>
+
+                    ${aiSnippetHTML}
+                `;
+
+                container.appendChild(section);
+            });
+        }
+
+        // Función para resaltar palabras clave (Syntax Highlighting simulado)
+        function highlightKeywords(text) {
+            // Resaltar palabras clave
+            const keywords = ["Actúa", "Genera", "Crea", "Define", "Lista", "Excluye", "Incluye", "Formato", "Tono", "Objetivo", "Requisitos", "Basándote", "Sitemap", "Diseñador", "Frontend", "Ajustes", "Troubleshooting", "JavaScript", "CSS", "Bug", "Layout", "Embed", "Iframe", "Chatbot", "IA", "Constraint", "Audioguía", "Voz", "Speech"];
+            
+            let formattedText = text;
+            
+            // Reemplazar palabras clave
+            keywords.forEach(key => {
+                const regex = new RegExp(`\\b${key}\\b`, 'g');
+                formattedText = formattedText.replace(regex, `<span class="highlight-keyword">${key}</span>`);
+            });
+            
+            // Resaltar [texto] y **texto**
+            formattedText = formattedText.replace(/\[(.*?)\]/g, '<span class="highlight-brackets">[$1]</span>');
+            formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<span class="highlight-bold">$1</span>');
+            
+            return formattedText;
+        }
+
+        // Función Copiar al Portapapeles
+        function copyToClipboard(btn) {
+            const text = btn.getAttribute('data-content');
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalHTML = btn.innerHTML;
+                
+                // Cambiar estado visual
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> Copiado`;
+                btn.classList.add('copied');
+                
+                // Revertir después de 2 segundos
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Error al copiar: ', err);
+            });
+        }
+
+        // Iniciar renderizado cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', renderPrompts);
+
+    </script>
+</body>
+</html>
